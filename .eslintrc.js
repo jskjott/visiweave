@@ -51,6 +51,8 @@ module.exports = {
 		'no-multi-spaces': 1,
 		'no-trailing-spaces': 1,
 		'prettier/prettier': 1,
+		'no-use-before-define': 'off',
+    	'@typescript-eslint/no-use-before-define': 'off',
 		'eqeqeq': 1,
 		'@typescript-eslint/no-var-requires': 0,
 		'@typescript-eslint/no-explicit-any': 0,
