@@ -1,12 +1,6 @@
 // inspired by Mary Rose Cook's Little Lisp: https://maryrosecook.com/blog/post/little-lisp-interpreter
 
-// library
-
-const library: {} = {
-	print: function(x: string) {
-		console.log(x)
-	},
-}
+import { library } from './library'
 
 // parser
 
@@ -58,7 +52,6 @@ const parse = (input: string): LispList => {
 interface Scope {
 	[identifier: string]: Input
 }
-
 interface Input {
 	type: string
 	value: string
@@ -85,11 +78,9 @@ class Context {
 interface LambdaArguments {
 	[identifier: string]: Input
 }
-
 interface Special {
 	[name: string]: Function
 }
-
 type LambdaList = [Input, Input[], ...Array<LispList>]
 
 const special: Special = {
@@ -124,7 +115,10 @@ const interpretList = (input: LispList, context: Context): any[] => {
 	}
 }
 
-const interpret = (input: LispList | Input, context: Context | undefined): any => {
+const interpret = (
+	input: LispList | Input,
+	context: Context | undefined,
+): any => {
 	if (context === undefined) {
 		return interpret(input, new Context(library, undefined))
 	} else if (input instanceof Array) {
@@ -134,4 +128,10 @@ const interpret = (input: LispList | Input, context: Context | undefined): any =
 	} else {
 		return input.value
 	}
+}
+
+export function interpretLispString(str: string): any {
+	console.log(str)
+	const parsed = parse(str)
+	interpret(parsed, undefined)
 }
