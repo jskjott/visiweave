@@ -31,6 +31,9 @@
 					:id="cell.id"
 					:d="cell.points.join(' ').replace(',', ' ')"
 					:fill="index % 2 === 0 ? 'white' : 'red'"
+					@mousedown="select(cell.id)"
+					@mouseover="updateSelection(cell.id)"
+					@mouseup="endSelection(cell.id)"
 				/>
 			</g>
 		</svg>
@@ -39,8 +42,11 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { getSelectionRange } from '../scripts/helpers'
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+const selecting = false
+const selection = ''
 
 const vue = Vue.extend({
 	name: 'Interface',
@@ -48,7 +54,36 @@ const vue = Vue.extend({
 	data() {
 		return {
 			alphabet,
+			selecting,
+			selection,
 		}
+	},
+	methods: {
+		select: function(cellId) {
+			this.selecting = true
+			this.selection = cellId
+		},
+		updateSelection: function(cellId) {
+			const previous = this.$el.querySelectorAll('.selected')
+			for (const cell of previous) {
+				cell.setAttribute('class', '')
+			}
+
+			getSelectionRange(this.selection, cellId).forEach(cell => {
+				this.$el
+					.querySelector(`#${cell}`)
+					.setAttribute('class', 'selected')
+			})
+		},
+		endSelection: function(cellId) {
+
+			const previous = this.$el.querySelectorAll('.selected')
+			for (const cell of previous) {
+				cell.setAttribute('class', '')
+			}
+			this.selecting = false
+			this.selection = ''
+		},
 	},
 	computed: {
 		cells: function() {
@@ -62,8 +97,6 @@ const vue = Vue.extend({
 				let yCum = 0
 				columns.forEach((yAxis: number, cellIndex: number) => {
 					const cellName = `${this.alphabet[i]}${cellIndex}`
-
-					console.log(xAxis, yAxis)
 
 					const xOri = this.width * xCum
 					const yOri = this.height * yCum
@@ -88,7 +121,6 @@ const vue = Vue.extend({
 				xCum = xCum + xAxis
 			})
 
-			console.log(cells.length)
 			return cells
 		},
 	},
@@ -119,5 +151,11 @@ span {
 	align-items: center;
 	border: 1px solid grey;
 	box-sizing: border-box;
+}
+
+.selected {
+	fill: silver;
+	stroke: grey;
+	stroke-width: 5px;
 }
 </style>

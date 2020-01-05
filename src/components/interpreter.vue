@@ -13,8 +13,6 @@ import Vue from 'vue'
 import { interpretLispString } from '../scripts/lisp'
 import { library } from '../scripts/library'
 
-console.log(library)
-
 const columns: number[] = []
 
 const vue = Vue.extend({
@@ -48,8 +46,6 @@ const vue = Vue.extend({
 				const [interpreter] = document.getElementsByTagName('textarea')
 
 				if (interpreter) {
-					console.log(this)
-
 					interpretLispString(interpreter.value, this)
 
 					this.$emit('evaluated', this.columns)
@@ -68,7 +64,7 @@ export default vue
 
 <style scoped="">
 #interpreter {
-	background: #A36566;
+	background: #a36566;
 	color: floralwhite;
 	padding: 1rem;
 	font-size: 1.5em;
