@@ -1,8 +1,33 @@
 // inspired by Mary Rose Cook's Little Lisp: https://maryrosecook.com/blog/post/little-lisp-interpreter
 
-import { library } from './library'
-
 // parser
+const split = (input: string): string[] => {
+	let depth = 0
+
+	const lst = [...input]
+
+	const chunks = lst.reduce(
+		(acc: string[], char: string): string[] => {
+			if (char === '(') {
+				depth = depth + 1
+			} else if (char === ')') {
+				depth = depth - 1
+			}
+
+			if (char === ')' && depth === 0) {
+				acc[acc.length - 1] = acc[acc.length - 1] + char
+				acc.push('')
+				return acc
+			} else {
+				acc[acc.length - 1] = acc[acc.length - 1] + char
+				return acc
+			}
+		},
+		[''],
+	)
+
+	return chunks.slice(0, chunks.length - 1)
+}
 
 const tokenize = (input: string): string[] => {
 	return input
@@ -42,9 +67,10 @@ const parenthesize = (input: string[], list: any[] | undefined): any[] => {
 
 type LispList = [Input, ...Array<LispList | Input>]
 
-const parse = (input: string): LispList => {
+const parse = (input: string): LispList[] => {
+	const chunks = split(input)
 	//@ts-ignore
-	return parenthesize(tokenize(input), undefined)
+	return chunks.map(chunk => parenthesize(tokenize(chunk), undefined))
 }
 
 // interpreter
@@ -70,7 +96,7 @@ class Context {
 		} else if (this.parent !== undefined) {
 			return this.parent.get(identifier)
 		} else {
-			throw 'not identifier with provided value'
+			throw Error(`not identifier with provided value: ${identifier}`)
 		}
 	}
 }
@@ -82,9 +108,10 @@ interface Special {
 	[name: string]: Function
 }
 type LambdaList = [Input, Input[], ...Array<LispList>]
+type DefList = [Input, Input, ...Array<LispList>]
 
 const special: Special = {
-	lambda: function(input: LambdaList, context: Context) {
+	lambda: function(input: LambdaList, context: Context, library: any) {
 		return function() {
 			const lambdaArguments = arguments
 			const lambdaScope = input[1].reduce(
@@ -95,20 +122,34 @@ const special: Special = {
 				{},
 			)
 
-			return interpret(input[2], new Context(lambdaScope, context))
+			return interpret(
+				input[2],
+				new Context(lambdaScope, context),
+				library,
+			)
 		}
+	},
+	def: function(input: DefList, context: Context, library: any) {
+		const identifier = input[1].value
+		const [, value] = input
+		context.scope[identifier] = interpret(value, context, library)
+		return value
 	},
 }
 
-const interpretList = (input: LispList, context: Context): any[] => {
+const interpretList = (
+	input: LispList,
+	context: Context,
+	library: any,
+): any[] => {
 	if (input.length > 0 && input[0].value in special) {
-		return special[input[0].value](input, context)
+		return special[input[0].value](input, context, library)
 	} else {
 		const list = input.map(function(x) {
-			return interpret(x, context)
+			return interpret(x, context, library)
 		})
 		if (list[0] instanceof Function) {
-			return list[0].apply(undefined, list.slice(1))
+			return list[0].apply(undefined, [library, ...list.slice(1)])
 		} else {
 			return list
 		}
@@ -118,11 +159,12 @@ const interpretList = (input: LispList, context: Context): any[] => {
 const interpret = (
 	input: LispList | Input,
 	context: Context | undefined,
+	library: any,
 ): any => {
 	if (context === undefined) {
-		return interpret(input, new Context(library, undefined))
+		return interpret(input, new Context(library, undefined), library)
 	} else if (input instanceof Array) {
-		return interpretList(input, context)
+		return interpretList(input, context, library)
 	} else if (input.type === 'identifier') {
 		return context.get(input.value)
 	} else {
@@ -130,8 +172,7 @@ const interpret = (
 	}
 }
 
-export function interpretLispString(str: string): any {
-	console.log(str)
+export function interpretLispString(str: string, library: any): any {
 	const parsed = parse(str)
-	interpret(parsed, undefined)
+	parsed.forEach(chunk => interpret(chunk, undefined, library))
 }
