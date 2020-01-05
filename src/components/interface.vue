@@ -42,6 +42,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
+
+import { Cell } from '../scripts/state'
 import { getSelectionRange } from '../scripts/helpers'
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
@@ -59,24 +61,28 @@ const vue = Vue.extend({
 		}
 	},
 	methods: {
-		select: function(cellId) {
+		select: function(cellId: string) {
 			this.selecting = true
 			this.selection = cellId
 		},
-		updateSelection: function(cellId) {
+		updateSelection: function(cellId: string) {
 			const previous = this.$el.querySelectorAll('.selected')
-			for (const cell of previous) {
-				cell.setAttribute('class', '')
+
+			if (previous) {
+				for (const cell of previous) {
+					cell.setAttribute('class', '')
+				}
 			}
 
 			getSelectionRange(this.selection, cellId).forEach(cell => {
-				this.$el
-					.querySelector(`#${cell}`)
-					.setAttribute('class', 'selected')
+				const cellDOMElement = this.$el.querySelector(`#${cell}`)
+
+				if (cellDOMElement) {
+					cellDOMElement.setAttribute('class', 'selected')
+				}
 			})
 		},
-		endSelection: function(cellId) {
-
+		endSelection: function(cellId: string) {
 			const previous = this.$el.querySelectorAll('.selected')
 			for (const cell of previous) {
 				cell.setAttribute('class', '')
@@ -101,7 +107,7 @@ const vue = Vue.extend({
 					const xOri = this.width * xCum
 					const yOri = this.height * yCum
 
-					const cell = {
+					const cell: Cell = {
 						id: cellName,
 						points: [
 							[`M${xOri}`, yOri],
@@ -151,6 +157,7 @@ span {
 	align-items: center;
 	border: 1px solid grey;
 	box-sizing: border-box;
+	background: #f7f7f7;
 }
 
 .selected {

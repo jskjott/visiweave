@@ -31,7 +31,7 @@ const vue = Vue.extend({
 		return state
 	},
 	methods: {
-		evaluated: function(data) {
+		evaluated: function(data: number[]) {
 			this.columns = data
 			this.key++
 		},

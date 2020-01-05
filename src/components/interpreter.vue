@@ -9,11 +9,17 @@
 <script lang="ts">
 import Vue from 'vue'
 
+import CodeMirror from 'codemirror/lib/codemirror.js'
+import 'codemirror/mode/commonlisp/commonlisp.js'
+import '../../node_modules/codemirror/lib/codemirror.css'
+import 'codemirror/theme/elegant.css'
+
 // lisp interpreter
 import { interpretLispString } from '../scripts/lisp'
 import { library } from '../scripts/library'
 
 const columns: number[] = []
+let interpreter: CodeMirror
 
 const vue = Vue.extend({
 	name: 'Interpreter',
@@ -22,10 +28,25 @@ const vue = Vue.extend({
 	data() {
 		return {
 			columns,
+			interpreter,
 		}
 	},
 	watch: {},
 	mounted() {
+		const [textareaElement] = document.getElementsByTagName('textarea')
+
+		this.interpreter = CodeMirror.fromTextArea(textareaElement, {
+			lineNumbers: true,
+			theme: 'elegant',
+		})
+
+		this.interpreter.on('change', (cm: CodeMirror) => {
+			const text = cm.getValue()
+
+			interpretLispString(text, this)
+			this.$emit('evaluated', this.columns)
+		})
+
 		interface KeysPressed {
 			[key: string]: true
 		}
@@ -62,11 +83,4 @@ const vue = Vue.extend({
 export default vue
 </script>
 
-<style scoped="">
-#interpreter {
-	background: #a36566;
-	color: floralwhite;
-	padding: 1rem;
-	font-size: 1.5em;
-}
-</style>
+<style scoped=""></style>
