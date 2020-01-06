@@ -19,15 +19,11 @@
 				{{ index }}
 			</div>
 		</div>
-		<svg
-			:key="cells.length"
-			:height="height"
-			:width="width"
-			xmlns="http://www.w3.org/2000/svg"
-		>
+		<svg :height="height" :width="width"
+xmlns="http://www.w3.org/2000/svg">
 			<g>
 				<path
-					v-for="(cell, index) in cells"
+					v-for="(cell, index) in Object.values(cells)"
 					:id="cell.id"
 					:d="cell.points.join(' ').replace(',', ' ')"
 					:fill="index % 2 === 0 ? 'white' : 'red'"
@@ -52,7 +48,7 @@ const selection = ''
 
 const vue = Vue.extend({
 	name: 'Interface',
-	props: ['width', 'height', 'columns'],
+	props: ['width', 'height', 'columns', 'cells'],
 	data() {
 		return {
 			alphabet,
@@ -89,45 +85,6 @@ const vue = Vue.extend({
 			}
 			this.selecting = false
 			this.selection = ''
-		},
-	},
-	computed: {
-		cells: function() {
-			const { columns } = this
-
-			const cells: Cell[] = []
-
-			let xCum = 0
-
-			columns.forEach((xAxis: number, i: number) => {
-				let yCum = 0
-				columns.forEach((yAxis: number, cellIndex: number) => {
-					const cellName = `${this.alphabet[i]}${cellIndex}`
-
-					const xOri = this.width * xCum
-					const yOri = this.height * yCum
-
-					const cell: Cell = {
-						id: cellName,
-						points: [
-							[`M${xOri}`, yOri],
-							[`L${xOri}`, yOri + this.height * yAxis],
-							[
-								`L${xOri + this.width * xAxis}`,
-								yOri + this.height * yAxis,
-							],
-							[`L${xOri + this.width * xAxis}`, yOri],
-						],
-					}
-
-					cells.push(cell)
-
-					yCum = yCum + yAxis
-				})
-				xCum = xCum + xAxis
-			})
-
-			return cells
 		},
 	},
 })

@@ -175,4 +175,19 @@ const interpret = (
 export function interpretLispString(str: string, library: any): any {
 	const parsed = parse(str)
 	parsed.forEach(chunk => interpret(chunk, undefined, library))
+
+	Object.values(library.cells).forEach(cell => {
+		const { length } = Object.values(cell.transformations)
+		Object.values(cell.transformations)
+			.reverse()
+			.forEach((axis, index) => {
+				axis.forEach((transformation, tIndex) => {
+					cell.points.splice(
+						length - index + tIndex,
+						0,
+						transformation,
+					)
+				})
+			})
+	})
 }

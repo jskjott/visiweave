@@ -1,12 +1,15 @@
 <template>
 	<div id="app">
 		<div id="interpreter">
-			<interpreter @evaluated="evaluated"></interpreter>
+			<interpreter
+				@evaluated="evaluated"
+				v-bind="{ height, width }"
+			></interpreter>
 		</div>
 		<div id="interface">
 			<interface
 				:key="key"
-				v-bind="{ height, width, columns }"
+				v-bind="{ height, width, columns, cells }"
 			></interface>
 		</div>
 	</div>
@@ -31,8 +34,11 @@ const vue = Vue.extend({
 		return state
 	},
 	methods: {
-		evaluated: function(data: number[]) {
-			this.columns = data
+		evaluated: function(data: {}) {
+			const { cells, columns } = data
+
+			this.columns = columns
+			this.cells = cells
 			this.key++
 		},
 	},

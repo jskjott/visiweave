@@ -3,6 +3,18 @@ type Coordinates = [number | string, number]
 export interface Cell {
 	id: string
 	points: Coordinates[]
+	origin: {
+		x: number
+		y: number
+	}
+	width: number
+	height: number
+	transformations: {
+		a: []
+		b: []
+		c: []
+		d: []
+	}
 }
 
 export interface State {
@@ -18,7 +30,7 @@ export interface State {
 export const state: State = {
 	height: 500,
 	width: 500,
-	columns: [1 / 7, 2 / 7, 1 / 7, 2 / 7, 1 / 7],
-	heartmap: {},
+	columns: [],
+	cells: {},
 	key: 0,
 }

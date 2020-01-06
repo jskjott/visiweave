@@ -1,4 +1,5 @@
 import Vue from '../components/interpreter.vue'
+import { getSelectionRange } from '../scripts/helpers'
 
 interface Library {
 	[name: string]: Function
@@ -16,8 +17,8 @@ interface GridElement {
 type Coordinate = [number, number]
 
 const library: Library = {
-	print: (x: string) => {
-		console.log(x)
+	print: (...args: string) => {
+		console.log(args[1])
 	},
 
 	test: (name: string, a: any, b: any): boolean => {
@@ -46,39 +47,33 @@ const library: Library = {
 
 	// Spreadsheet Flow
 
-	map: (arr: [], fn: () => {}) => {
+	map: (vue, arr: [], fn: () => {}) => {
 		return arr.map(fn)
 	},
 
-	each: (arr: any[], fn: (...args: any[]) => {}) => {
+	each: (vue, arr: any[], fn: (...args: any[]) => {}) => {
 		for (let i = 0; i < arr.length; i++) {
 			const arg: [] = Array.isArray(arr[i]) ? arr[i] : [arr[i]]
-			fn(...arg)
+			fn(vue, ...arg)
 		}
 	},
 
-	select: (input: []): object[] => {
-		const elements = input.map(val =>
-			document.getElementsByTagName('polygon').namedItem(val),
+	select: (...args: any[]): object[] => {
+		const [vue, selection] = args
+
+		let selectedCells
+
+		if (selection.includes(':')) {
+			selectedCells = getSelectionRange(...selection.split(':'))
+		} else {
+			selectedCells = [selection]
+		}
+
+		const elements = selectedCells.map(val =>
+			document.getElementsByTagName('path').namedItem(val),
 		)
 
-		const pointCoordinates: object[] = elements.map(element => {
-			let curElement = {}
-
-			if (element && element.dataset.width && element.dataset.height) {
-				curElement = {
-					id: element.id,
-					fill: element.style.fill,
-					width: parseInt(element.dataset.width),
-					height: parseInt(element.dataset.height),
-					x: element.points[0].x,
-					y: element.points[0].y,
-				}
-			}
-
-			return curElement
-		})
-		return pointCoordinates
+		return selectedCells
 	},
 
 	// Grids
@@ -107,46 +102,73 @@ const library: Library = {
 
 	// Drawing
 
-	// lineTo: (lst: GridElement[], x: number, y: number) => {
-	// 	const element = lst[0]
+	lineTo: (vue, pathElement, x: number, y: number) => {
+		const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
-	// 	const toDelete = document.getElementById(element.id)
-	// 	toDelete.setAttribute('points', '100 100 300 100 300 300')
-	// 	const [svg] = document.getElementsByTagName('svg')
+		console.log(pathElement, x, y)
 
-	// 	if (toDelete) {
-	// 		toDelete.innerHTML = ''
-	// 	}
+		const cell = vue.cells[pathElement]
+		const cellIndex = Object.values(vue.cells).findIndex(
+			element => element.id === cell.id,
+		)
 
-	// 	const polygon = document.createElementNS(
-	// 		'http://www.w3.org/2000/svg',
-	// 		'polygon',
-	// 	)
-	// 	polygon.id = element.id
-	// 	polygon.style.fill = 'yellow'
-	// 	svg.appendChild(polygon)
+		const columnIndex = alphabet.findIndex(
+			element => element === cell.id[0],
+		)
 
-	// 	const polygonPoints = [
-	// 		[element.y, element.x],
-	// 		[element.y, element.x + element.width],
-	// 		[element.y + element.height, element.x + element.width],
-	// 		[
-	// 			element.y + element.height + x * element.height,
-	// 			element.x + element.width + y * element.width,
-	// 		],
-	// 		[element.y + element.height, element.x],
-	// 	]
+		const { length } = vue.columns
+		const [reflectedColumn, reflectedRow] = [
+			alphabet[cell.id.slice(1)],
+			columnIndex,
+		]
+		const reflectedCellIndex = Object.values(vue.cells).findIndex(
+			element => element.id === `${reflectedColumn}${reflectedRow}`,
+		)
 
-	// 	polygonPoints.forEach(value => {
-	// 		const point = svg.createSVGPoint()
-	// 		const [x, y] = value
-	// 		point.x = x
-	// 		point.y = y
-	// 		polygon.points.appendItem(point)
-	// 	})
-	// },
+		if (cellIndex % 2 === 0) {
+			const nextColumnLetter = String.fromCharCode(
+				cell.id[0].charCodeAt(0) + 1,
+			)
+			const redCellId = `${nextColumnLetter}${cell.id.slice(1)}`
 
-	// curve: (cx: number, cy: number, x: number, y: number) => {},
+			const redCell = vue.cells[redCellId]
+
+			const reflectedCellId = `${reflectedColumn}${reflectedRow + 1}`
+			const reflectedCell = vue.cells[reflectedCellId]
+
+			if (redCell && reflectedCell) {
+				const item = [
+					`L${redCell.origin.x - (1 - x) * redCell.width}`,
+					redCell.origin.y + y * redCell.height,
+				]
+				redCell.transformations.a.push(item)
+
+				const reflectedCellItem = [
+					`L${reflectedCell.origin.x + y * reflectedCell.width}`,
+					reflectedCell.origin.y + (x - 1) * reflectedCell.height,
+				]
+
+				reflectedCell.transformations.d.push(reflectedCellItem)
+			}
+		} else {
+			const item = [
+				`L${cell.origin.x + x * cell.width}`,
+				cell.origin.y + y * cell.height,
+			]
+
+			cell.transformations.c.push(item)
+
+			const reflectedCellId = `${reflectedColumn}${reflectedRow}`
+			const reflectedCell = vue.cells[reflectedCellId]
+
+			const reflectedCellItem = [
+				`L${reflectedCell.origin.x + y * reflectedCell.width}`,
+				reflectedCell.origin.y + x * reflectedCell.height,
+			]
+
+			reflectedCell.transformations.b.push(reflectedCellItem)
+		}
+	},
 }
 
 export { library }

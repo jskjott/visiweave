@@ -1,8 +1,9 @@
 <template>
 	<div>
-		<textarea id="interpreter" style="height: 525px; width: 525px">
-(grid 1 2 1 2 1)</textarea
-		>
+		<textarea
+			id="interpreter"
+			style="height: 525px; width: 525px"
+		></textarea>
 	</div>
 </template>
 
@@ -24,7 +25,7 @@ let interpreter: CodeMirror
 const vue = Vue.extend({
 	name: 'Interpreter',
 	methods: library,
-	props: [],
+	props: ['width', 'height'],
 	data() {
 		return {
 			columns,
@@ -44,7 +45,11 @@ const vue = Vue.extend({
 			const text = cm.getValue()
 
 			interpretLispString(text, this)
-			this.$emit('evaluated', this.columns)
+
+			this.$emit('evaluated', {
+				columns: this.columns,
+				cells: this.cells,
+			})
 		})
 
 		interface KeysPressed {
@@ -69,7 +74,10 @@ const vue = Vue.extend({
 				if (interpreter) {
 					interpretLispString(interpreter.value, this)
 
-					this.$emit('evaluated', this.columns)
+					this.$emit('evaluated', {
+						columns: this.columns,
+						cells: this.cells,
+					})
 				}
 			}
 		}
@@ -77,6 +85,69 @@ const vue = Vue.extend({
 		window.onkeyup = (event: KeyboardEvent): any => {
 			delete keysPressed[event.key]
 		}
+
+		const startHeart = `(grid 1 2 1 2 1)
+
+(map 
+	(select "A0:E4") 
+ 	(lambda (a) 
+    	(lineTo a 0.75 0.5)
+    )
+)`
+
+		this.interpreter.setValue(startHeart)
+	},
+	computed: {
+		cells: function() {
+			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+			const { columns } = this
+
+			const cells: {} = {}
+
+			let xCum = 0
+
+			columns.forEach((xAxis: number, i: number) => {
+				let yCum = 0
+				columns.forEach((yAxis: number, cellIndex: number) => {
+					const cellName = `${alphabet[i]}${cellIndex}`
+
+					const xOri = this.width * xCum
+					const yOri = this.height * yCum
+
+					const cell: Cell = {
+						id: cellName,
+						points: [
+							[`M${xOri}`, yOri],
+							[`L${xOri}`, yOri + this.height * yAxis],
+							[
+								`L${xOri + this.width * xAxis}`,
+								yOri + this.height * yAxis,
+							],
+							[`L${xOri + this.width * xAxis}`, yOri],
+						],
+						origin: {
+							x: xOri,
+							y: yOri,
+						},
+						width: xAxis * this.width,
+						height: yAxis * this.height,
+						transformations: {
+							a: [],
+							b: [],
+							c: [],
+							d: [],
+						},
+					}
+
+					cells[cellName] = cell
+
+					yCum = yCum + yAxis
+				})
+				xCum = xCum + xAxis
+			})
+
+			return cells
+		},
 	},
 })
 
