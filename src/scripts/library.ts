@@ -105,8 +105,6 @@ const library: Library = {
 	lineTo: (vue, pathElement, x: number, y: number) => {
 		const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
-		console.log(pathElement, x, y)
-
 		const cell = vue.cells[pathElement]
 		const cellIndex = Object.values(vue.cells).findIndex(
 			element => element.id === cell.id,
@@ -167,6 +165,34 @@ const library: Library = {
 			]
 
 			reflectedCell.transformations.b.push(reflectedCellItem)
+
+			const nextColumnLetter = String.fromCharCode(
+				vue.cells[reflectedCellId].id[0].charCodeAt(0) + 1,
+			)
+
+			const whiteColumn = alphabet[reflectedCellIndex]
+			const whiteCell = vue.cells[`${nextColumnLetter}${reflectedRow}`]
+
+			if (whiteCell) {
+				const whiteItem = [
+					`L${whiteCell.origin.x + (x - 1) * cell.height}`,
+					whiteCell.origin.y + y * cell.width,
+				]
+				whiteCell.transformations.a.push(whiteItem)
+			}
+
+			const reflectedWhiteCell =
+				vue.cells[`${reflectedColumn}${reflectedRow + 1}`]
+
+			if (reflectedWhiteCell) {
+				const reflectedWhiteItem = [
+					`L${reflectedWhiteCell.origin.x +
+						y * reflectedWhiteCell.width}`,
+					reflectedWhiteCell.origin.y +
+						(x - 1) * reflectedCell.height,
+				]
+				reflectedWhiteCell.transformations.d.push(reflectedWhiteItem)
+			}
 		}
 	},
 }
