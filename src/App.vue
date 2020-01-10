@@ -3,12 +3,13 @@
 		<div id="interpreter">
 			<interpreter
 				@evaluated="evaluated"
-				v-bind="{ height, width, urlHash }"
+				v-bind="{ height, width, selection, urlHash }"
 			></interpreter>
 		</div>
 		<div id="interface">
 			<interface
 				:key="key"
+				@selection="select"
 				v-bind="{ height, width, columns, cells }"
 			></interface>
 		</div>
@@ -37,8 +38,7 @@ const vue = Vue.extend({
 		if (window.location.hash) {
 			this.urlHash = decodeURI(window.location.hash)
 		} else {
-			this.urlHash = "(grid 1ąą)"
-			
+			this.urlHash = '(grid%201ąą)'
 		}
 	},
 	methods: {
@@ -50,7 +50,10 @@ const vue = Vue.extend({
 			this.columns = columns
 			this.cells = cells
 			this.key++
-		}
+		},
+		select: function( data: string) {
+			this.selection = data
+		},
 	},
 })
 

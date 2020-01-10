@@ -25,6 +25,7 @@ export interface State {
 		[targetCell: string]: string
 	}
 	key: number
+	selection: string
 	urlHash: string
 }
 
@@ -34,5 +35,6 @@ export const state: State = {
 	columns: [],
 	cells: {},
 	key: 0,
+	selection: '',
 	urlHash: '',
 }

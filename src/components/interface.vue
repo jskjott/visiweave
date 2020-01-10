@@ -10,6 +10,9 @@
 				{{ alphabet[index] }}
 			</span>
 		</div>
+		<div class="additionButton tick">
+			<!-- + -->
+		</div>
 		<div>
 			<div
 				class="tick"
@@ -25,7 +28,7 @@ xmlns="http://www.w3.org/2000/svg">
 				<path
 					v-for="(cell, index) in Object.values(cells)"
 					:id="cell.id"
-					:d="cell.points.join(' ').replace(',', ' ')"
+					:d="cell.points.join(' ').replace(',', ' ') + ' Z'"
 					:fill="index % 2 === 0 ? 'white' : 'red'"
 					@mousedown="select(cell.id)"
 					@mouseover="updateSelection(cell.id)"
@@ -33,6 +36,10 @@ xmlns="http://www.w3.org/2000/svg">
 				/>
 			</g>
 		</svg>
+		<div></div>
+		<div class="additionButton tick">
+			<!-- + -->
+		</div>
 	</div>
 </template>
 
@@ -83,6 +90,9 @@ const vue = Vue.extend({
 			for (const cell of previous) {
 				cell.setAttribute('class', '')
 			}
+
+			this.$emit('selection', `${this.selection}:${cellId}`)
+
 			this.selecting = false
 			this.selection = ''
 		},
@@ -95,7 +105,7 @@ export default vue
 <style scoped="">
 #interface {
 	display: grid;
-	grid-template-columns: 50px 500px;
+	grid-template-columns: 50px 500px 50px;
 	grid-template-rows: 50px 500px;
 }
 
@@ -121,5 +131,17 @@ span {
 	fill: silver;
 	stroke: grey;
 	stroke-width: 5px;
+}
+
+.additionButton {
+	width: 25px;
+	height: 25px;
+	margin: 12.5px;
+	background: white;
+}
+
+svg {
+	border: 1px solid grey;
+	box-sizing: border-box;
 }
 </style>
