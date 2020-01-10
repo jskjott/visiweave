@@ -3,7 +3,7 @@
 		<div id="interpreter">
 			<interpreter
 				@evaluated="evaluated"
-				v-bind="{ height, width }"
+				v-bind="{ height, width, urlHash }"
 			></interpreter>
 		</div>
 		<div id="interface">
@@ -33,14 +33,24 @@ const vue = Vue.extend({
 	data() {
 		return state
 	},
+	mounted() {
+		if (window.location.hash) {
+			this.urlHash = decodeURI(window.location.hash)
+		} else {
+			this.urlHash = "(grid 1ąą)"
+			
+		}
+	},
 	methods: {
 		evaluated: function(data: {}) {
-			const { cells, columns } = data
+			const { cells, columns, compressed } = data
+
+			window.location.hash = compressed
 
 			this.columns = columns
 			this.cells = cells
 			this.key++
-		},
+		}
 	},
 })
 

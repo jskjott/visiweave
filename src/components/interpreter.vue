@@ -2,7 +2,7 @@
 	<div>
 		<textarea
 			id="interpreter"
-			style="height: 525px; width: 525px"
+			style="height: 100%; width: 400px"
 		></textarea>
 	</div>
 </template>
@@ -18,6 +18,7 @@ import 'codemirror/theme/elegant.css'
 // lisp interpreter
 import { interpretLispString } from '../scripts/lisp'
 import { library } from '../scripts/library'
+import { compress, decompress } from '../scripts/compression'
 
 const columns: number[] = []
 let interpreter: CodeMirror
@@ -25,14 +26,33 @@ let interpreter: CodeMirror
 const vue = Vue.extend({
 	name: 'Interpreter',
 	methods: library,
-	props: ['width', 'height'],
+	props: ['width', 'height', 'selection', 'urlHash'],
 	data() {
 		return {
 			columns,
 			interpreter,
 		}
 	},
-	watch: {},
+	watch: {
+		selection: function(selection) {
+
+			const selectionString = `
+
+(map
+	(select "${selection}") 
+	(lambda (a) 
+		()
+	)
+)`
+
+			this.interpreter.replaceRange(selectionString, {line: Infinity})
+		},
+		urlHash: function(url) {
+			console.log(url)
+			const decompressed = decompress(url.substr(2))
+			this.interpreter.setValue(decompressed)
+		}
+	},
 	mounted() {
 		const [textareaElement] = document.getElementsByTagName('textarea')
 
@@ -44,9 +64,11 @@ const vue = Vue.extend({
 		this.interpreter.on('change', (cm: CodeMirror) => {
 			const text = cm.getValue()
 
+			const compressed = `#0${compress(text)}`
 			interpretLispString(text, this)
 
 			this.$emit('evaluated', {
+				compressed,
 				columns: this.columns,
 				cells: this.cells,
 			})
@@ -86,16 +108,6 @@ const vue = Vue.extend({
 			delete keysPressed[event.key]
 		}
 
-		const startHeart = `(grid 1 2 1 2 1)
-
-(map 
-	(select "A0:E4") 
- 	(lambda (a) 
-    	(lineTo a 0.75 0.5)
-    )
-)`
-
-		this.interpreter.setValue(startHeart)
 	},
 	computed: {
 		cells: function() {

@@ -14,7 +14,7 @@ export interface Cell {
 		b: []
 		c: []
 		d: []
-	}
+	},
 }
 
 export interface State {
@@ -25,6 +25,7 @@ export interface State {
 		[targetCell: string]: string
 	}
 	key: number
+	urlHash: string
 }
 
 export const state: State = {
@@ -33,4 +34,5 @@ export const state: State = {
 	columns: [],
 	cells: {},
 	key: 0,
+	urlHash: '',
 }
