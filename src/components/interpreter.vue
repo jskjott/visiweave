@@ -2,7 +2,7 @@
 	<div>
 		<textarea
 			id="interpreter"
-			style="height: 100%; width: 400px"
+			style="height: 100%; width: 300px"
 		></textarea>
 	</div>
 </template>
@@ -35,23 +35,25 @@ const vue = Vue.extend({
 	},
 	watch: {
 		selection: function(selection) {
-
 			const selectionString = `
 
-(map
+(each
 	(select "${selection}") 
 	(lambda (a) 
 		()
 	)
 )`
 
-			this.interpreter.replaceRange(selectionString, {line: Infinity})
+			this.interpreter.replaceRange(selectionString, { line: Infinity })
 		},
 		urlHash: function(url) {
-			console.log(url)
 			const decompressed = decompress(url.substr(2))
 			this.interpreter.setValue(decompressed)
-		}
+			console.log(this.interpreter)
+			Vue.nextTick(() => {
+				this.interpreter.refresh()
+			})
+		},
 	},
 	mounted() {
 		const [textareaElement] = document.getElementsByTagName('textarea')
@@ -108,6 +110,7 @@ const vue = Vue.extend({
 			delete keysPressed[event.key]
 		}
 
+		this.interpreter.refresh()
 	},
 	computed: {
 		cells: function() {

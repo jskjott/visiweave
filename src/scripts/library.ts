@@ -47,16 +47,16 @@ const library: Library = {
 
 	// Spreadsheet Flow
 
-	map: (vue, arr: [], fn: () => {}) => {
+	each: (vue, arr: [], fn: () => {}) => {
 		return arr.map(fn)
 	},
 
-	each: (vue, arr: any[], fn: (...args: any[]) => {}) => {
-		for (let i = 0; i < arr.length; i++) {
-			const arg: [] = Array.isArray(arr[i]) ? arr[i] : [arr[i]]
-			fn(vue, ...arg)
-		}
-	},
+	// each: (vue, arr: any[], fn: (...args: any[]) => {}) => {
+	// 	for (let i = 0; i < arr.length; i++) {
+	// 		const arg: [] = Array.isArray(arr[i]) ? arr[i] : [arr[i]]
+	// 		fn(vue, ...arg)
+	// 	}
+	// },
 
 	select: (...args: any[]): object[] => {
 		const [vue, selection] = args
@@ -76,11 +76,33 @@ const library: Library = {
 		return selectedCells
 	},
 
+	range: (vue, start: number, end: number, step = 1) => {
+		const arr = []
+		if (step > 0) {
+			for (let i = start; i <= end; i += step) {
+				arr.push(i)
+			}
+		} else {
+			for (let i = start; i >= end; i += step) {
+				arr.push(i)
+			}
+		}
+		return arr
+	},
+
 	// Grids
 
-	grid: (...args: any[]) => {
+	sheet: (...args: any[]) => {
 		const [vue]: typeof Vue = args
-		const columns = args.slice(1)
+		const rest = args.slice(1)
+
+		let columns
+
+		if (Array.isArray(rest)) {
+			;[columns] = rest
+		} else {
+			columns = rest
+		}
 
 		const sum = columns.reduce((sum, val) => sum + val)
 		const areas = columns.map(val => val / sum)
@@ -102,7 +124,130 @@ const library: Library = {
 
 	// Drawing
 
-	lineTo: (vue, pathElement, x: number, y: number) => {
+	sidepath: (vue, cellId, side, pathData) => {
+		let cell
+
+		if (Array.isArray(cellId)) {
+			cell = vue.cells[cellId[0]]
+		} else {
+			cell = vue.cells[cellId]
+		}
+
+		const sidePaths = {
+			'#NW': [cell.origin.x, cell.origin.y],
+			'#N': [cell.origin.x + cell.width * 0.5, cell.origin.y],
+			'#NE': [cell.origin.x + cell.width, cell.origin.y],
+			'#W': [cell.origin.x, cell.origin.y + cell.height * 0.5],
+			'#O': [
+				cell.origin.x + cell.width * 0.5,
+				cell.origin.x + cell.height * 0.5,
+			],
+			'#E': [
+				cell.origin.x + cell.width,
+				cell.origin.y + cell.height * 0.5,
+			],
+			'#SE': [cell.origin.x + cell.width, cell.origin.y + cell.height],
+			'#S': [
+				cell.origin.x + cell.width * 0.5,
+				cell.origin.y + cell.height,
+			],
+			'#SW': [cell.origin.x, cell.origin.y + cell.height],
+		}
+		const sides = {
+			'#N': 'd',
+			'#W': 'a',
+			'#S': 'b',
+			'#E': 'c',
+		}
+		const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+
+		const cellIndex = Object.values(vue.cells).findIndex(
+			element => element.id === cell.id,
+		)
+
+		function pythagoras(a: number, b: number) {
+			return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))
+		}
+
+		const [origin, end, degree] = pathData
+
+		const x1 = sidePaths[origin][0] - cell.origin.x
+		const x2 = sidePaths[end][0] - cell.origin.x
+		const y1 = sidePaths[origin][1] - cell.origin.y
+		const y2 = sidePaths[end][1] - cell.origin.y
+
+		const a = Math.abs(x2 - x1)
+		const b = Math.abs(y2 - y1)
+		const aNon = x2 - x1
+		const bNon = y2 - y1
+
+		const diagonal = pythagoras(a, b)
+
+		const widthRelationship = a / diagonal
+		const heigthRelationship = b / diagonal
+
+		let additionX
+		let additionY
+
+		if (sidePaths[end][0] < sidePaths[origin][0]) {
+			additionX =
+				sidePaths[origin][0] - diagonal * degree * widthRelationship
+		} else {
+			additionX =
+				sidePaths[origin][0] + diagonal * degree * widthRelationship
+		}
+
+		if (sidePaths[end][1] < sidePaths[origin][1]) {
+			additionY =
+				sidePaths[origin][1] - diagonal * degree * heigthRelationship
+		} else {
+			additionY =
+				sidePaths[origin][1] + diagonal * degree * heigthRelationship
+		}
+
+		const item = [`L${additionX}`, additionY]
+
+		cell.transformations[sides[side]].push(item)
+
+		// get contacting cell
+
+		const columnIndex = alphabet.findIndex(
+			element => element === cell.id[0],
+		)
+
+		let adjacentCellId
+		let adjacentCellSide
+
+		const columnNumber = Math.sqrt(Object.values(vue.cells).length)
+
+		if (sides[side] === 'a' && columnIndex > 0) {
+			adjacentCellId = `${alphabet[columnIndex - 1]}${cellId.slice(1)}`
+			adjacentCellSide = 'c'
+		} else if (
+			sides[side] === 'b' &&
+			parseInt(cellId.slice(1)) + 1 < columnNumber
+		) {
+			adjacentCellId = `${alphabet[columnIndex]}${parseInt(
+				cellId.slice(1),
+			) + 1}`
+			adjacentCellSide = 'd'
+		} else if (sides[side] === 'c' && columnIndex + 1 < columnNumber) {
+			adjacentCellId = `${alphabet[columnIndex + 1]}${cellId.slice(1)}`
+			adjacentCellSide = 'a'
+		} else if (sides[side] === 'd' && parseInt(cellId.slice(1)) > 0) {
+			adjacentCellId = `${alphabet[columnIndex]}${parseInt(
+				cellId.slice(1),
+			) - 1}`
+			adjacentCellSide = 'b'
+		}
+
+		if (adjacentCellId) {
+			const adjacentCell = vue.cells[adjacentCellId]
+			adjacentCell.transformations[adjacentCellSide].push(item)
+		}
+	},
+
+	addpoint: (vue, pathElement, x: number, y: number) => {
 		const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
 		const cell = vue.cells[pathElement]

@@ -1,27 +1,9 @@
 <template>
-	<div id="interface">
+	<div id="unweavedForm">
 		<div></div>
-		<div id="columnSider">
-			<span
-				class="tick"
-				v-for="(columnWidth, index) in columns"
-				:style="{ width: `${columnWidth * width}px` }"
-			>
-				{{ alphabet[index] }}
-			</span>
-		</div>
-		<div class="additionButton tick">
-			<!-- + -->
-		</div>
-		<div>
-			<div
-				class="tick"
-				v-for="(rowHeight, index) in columns"
-				:style="{ height: `${rowHeight * height}px` }"
-			>
-				{{ index }}
-			</div>
-		</div>
+		<div id="columnSider"></div>
+
+		<div></div>
 		<svg
 :height="height" :width="width" xmlns="http://www.w3.org/2000/svg">
 			<g>
@@ -29,17 +11,13 @@
 					v-for="(cell, index) in Object.values(cells)"
 					:id="cell.id"
 					:d="cell.points.join(' ').replace(',', ' ') + ' Z'"
-					:fill="index % 2 === 0 ? colours.colourA : colours.colourB"
-					@mousedown="select(cell.id)"
-					@mouseover="updateSelection(cell.id)"
-					@mouseup="endSelection(cell.id)"
+					stroke="black"
+					fill="none"
+					transform="scale(0.3333,0.3333)"
 				/>
 			</g>
 		</svg>
 		<div></div>
-		<div class="additionButton tick">
-			<!-- + -->
-		</div>
 	</div>
 </template>
 
@@ -54,12 +32,14 @@ const selection = ''
 
 const vue = Vue.extend({
 	name: 'Interface',
-	props: ['width', 'height', 'columns', 'cells', 'colours'],
+	props: ['columns', 'cells'],
 	data() {
 		return {
 			alphabet,
 			selecting,
 			selection,
+			width: 133.5,
+			height: 133.5,
 		}
 	},
 	methods: {
@@ -102,10 +82,10 @@ export default vue
 </script>
 
 <style scoped="">
-#interface {
+#unweavedForm {
 	display: grid;
-	grid-template-columns: 50px 400px 50px;
-	grid-template-rows: 50px 400px;
+	grid-template-columns: 133.5px;
+	grid-template-rows: 133.5px;
 }
 
 span {

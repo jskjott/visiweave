@@ -1,12 +1,12 @@
 export const compress = (str: string) => {
+	const dictionary = {},
+		uncompressed = str,
+		result = []
 
 	let i,
-		dictionary = {},
-		uncompressed = str,
 		c,
 		wc,
 		w = '',
-		result = [],
 		ASCII = '',
 		dictSize = 256
 	for (i = 0; i < 256; i += 1) {
