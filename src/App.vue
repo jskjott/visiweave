@@ -17,11 +17,6 @@
 			<colourSelector @colours="updateColour"></colourSelector>
 			<div id="unweavedForms">
 				<unweavedForm
-					:key="key"
-					@selection="select"
-					v-bind="{ columns, cells }"
-				></unweavedForm>
-				<unweavedForm
 					:key="key + 1"
 					@selection="select"
 					v-bind="{ columns, cells, colours }"
