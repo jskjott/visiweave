@@ -1,14 +1,22 @@
 <template>
 	<div id="colourSelector">
 		<svg width="10" height="10">
-		  <rect width="10" height="10" :fill="colours.colourA" />
+			<rect
+width="10" height="10" :fill="colours.colourA" />
 		</svg>
-		<input v-model="colours.colourA" v-on:input="() => this.$emit('colours', colours)">
+		<input
+			v-model="colours.colourA"
+			v-on:input="() => this.$emit('colours', colours)"
+		/>
 
 		<svg width="10" height="10">
-		  <rect width="10" height="10" :fill="colours.colourB" />
+			<rect width="10" height="10"
+:fill="colours.colourB" />
 		</svg>
-		<input v-model="colours.colourB" v-on:input="() => this.$emit('colours', colours)">
+		<input
+			v-model="colours.colourB"
+			v-on:input="() => this.$emit('colours', colours)"
+		/>
 	</div>
 </template>
 
@@ -32,8 +40,8 @@ const vue = Vue.extend({
 	},
 	watch: {
 		colours: function(colours) {
-			console.log(colours)
 			this.$emit('colours', colours)
+		},
 	},
 })
 

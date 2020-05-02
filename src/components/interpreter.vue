@@ -49,7 +49,6 @@ const vue = Vue.extend({
 		urlHash: function(url) {
 			const decompressed = decompress(url.substr(2))
 			this.interpreter.setValue(decompressed)
-			console.log(this.interpreter)
 			Vue.nextTick(() => {
 				this.interpreter.refresh()
 			})
