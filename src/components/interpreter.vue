@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div style="height: 100%">
 		<textarea
 			id="interpreter"
 			style="height: 100%; width: 300px"
@@ -13,6 +13,7 @@ import Vue from 'vue'
 import CodeMirror from 'codemirror/lib/codemirror.js'
 import 'codemirror/mode/commonlisp/commonlisp.js'
 import '../../node_modules/codemirror/lib/codemirror.css'
+import './codeMirror.css'
 import 'codemirror/theme/elegant.css'
 
 // lisp interpreter
