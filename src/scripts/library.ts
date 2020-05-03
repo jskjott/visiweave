@@ -119,7 +119,7 @@ const library: Library = {
 			[0],
 		)
 
-		vue.columns = cumsum
+		//vue.columns = cumsum
 	},
 
 	// Drawing

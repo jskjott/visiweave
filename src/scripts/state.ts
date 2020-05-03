@@ -2,6 +2,7 @@ type Coordinates = [number | string, number]
 
 export interface Cell {
 	id: string
+	selected: boolean
 	points: Coordinates[]
 	origin: {
 		x: number
@@ -18,6 +19,8 @@ export interface Cell {
 }
 
 export interface State {
+	showInterpreter: boolean
+	showExportPane: boolean
 	height: number
 	width: number
 	columns: number[]
@@ -35,15 +38,17 @@ export interface State {
 }
 
 export const state: State = {
-	height: 400,
-	width: 400,
+	showInterpreter: false,
+	showExportPane: false,
+	height: 1840,
+	width: 1840,
 	columns: [],
 	cells: {},
 	key: 0,
 	selection: '',
 	urlHash: '',
 	colours: {
-		colourA: 'white',
-		colourB: 'red',
+		colourA: 'lavender',
+		colourB: 'crimson',
 	},
 }

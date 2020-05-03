@@ -15,8 +15,8 @@ export interface State {
 }
 
 export const state: State = {
-	height: 400,
-	width: 400,
+	height: 1840,
+	width: 1840,
 	columns: [0.25, 0.5, 0.75],
 	heartmap: {},
 }

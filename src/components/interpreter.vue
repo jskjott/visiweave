@@ -21,7 +21,33 @@ import { interpretLispString } from '../scripts/lisp'
 import { library } from '../scripts/library'
 import { compress, decompress } from '../scripts/compression'
 
-const columns: number[] = []
+const columns: number[] = [
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+	0.04,
+]
 let interpreter: CodeMirror
 
 const vue = Vue.extend({
@@ -131,6 +157,7 @@ const vue = Vue.extend({
 
 					const cell: Cell = {
 						id: cellName,
+						selected: false,
 						points: [
 							[`M${xOri}`, yOri],
 							[`L${xOri}`, yOri + this.height * yAxis],

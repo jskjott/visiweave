@@ -23,8 +23,8 @@ width="10" height="10" :fill="colours.colourA" />
 <script lang="ts">
 import Vue from 'vue'
 
-const colourA = 'white'
-const colourB = 'red'
+const colourA = 'lavender'
+const colourB = 'white'
 
 const vue = Vue.extend({
 	name: 'colourSelector',
