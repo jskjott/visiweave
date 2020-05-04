@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<div>
+		<div id="formulaBar">
 			<formulaBar></formulaBar>
 		</div>
 		<div id="container">
@@ -29,7 +29,7 @@
 					<span v-else> < </span>
 				</div>
 				<div v-if="showExportPane" id="exportPane">
-					<colourSelector @colours="updateColour"></colourSelector>
+					<!-- <colourSelector @colours="updateColour"></colourSelector> -->
 					<div id="unweavedForms">
 						<unweavedForm
 							:key="key + 1"
@@ -37,11 +37,20 @@
 							v-bind="{ columns, cells, selection, colours }"
 						></unweavedForm>
 					</div>
-					<weavedForm
-						:key="key + 2"
-						@selection="select"
-						v-bind="{ columns, cells, selection, colours }"
-					></weavedForm>
+					<div
+						id="arrow"
+						style="text-align: center; font-size: 2em; padding-top: 1.25rem;"
+					>
+						⇣
+					</div>
+					<div id="weavedFormContainer">
+						<weavedForm
+							:key="key + 2"
+							@selection="select"
+							v-bind="{ columns, cells, selection, colours }"
+						></weavedForm>
+					</div>
+					<button v-on:click="print()">Print</button>
 				</div>
 			</div>
 		</div>
@@ -82,6 +91,9 @@ const vue = Vue.extend({
 		}
 	},
 	methods: {
+		print: function() {
+			window.print()
+		},
 		evaluated: function(data: {}) {
 			const { cells, columns, compressed } = data
 
@@ -123,6 +135,7 @@ export default vue
 
 <style>
 body {
+	overflow: hidden;
 	padding: 0;
 	margin: 0;
 }
@@ -148,6 +161,11 @@ body {
 	grid-template-columns: 1fr 1fr;
 }
 
+#weavedFormContainer {
+	position: absolute;
+	top: 250px;
+}
+
 #interpreterContainer {
 	display: flex;
 }
@@ -161,6 +179,63 @@ body {
 	overflow: hidden;
 }
 
+#exportPane {
+	width: 360px;
+}
+
+@media print {
+	#interpreter {
+		display: none;
+	}
+
+	#arrow {
+		display: none;
+	}
+
+	#interface {
+		display: none;
+	}
+
+	#weavedFormContainer {
+		transform: scale(0.25);
+		position: absolute;
+		top: -200;
+		left: 30;
+	}
+
+	#exportPane {
+		transform: rotate(90deg) scale(3.5);
+		position: absolute;
+		width: auto;
+		right: 300;
+		bottom: 100;
+	}
+
+	rect {
+		stroke: black;
+		stroke-width: 1;
+		fill: none;
+	}
+
+	path {
+		stroke: black;
+		stroke-width: 1;
+		fill: none;
+	}
+
+	button {
+		display: none;
+	}
+
+	.toggler {
+		display: none;
+	}
+
+	#formulaBar {
+		display: none;
+	}
+}
+
 #exportPaneContainer {
 	display: flex;
 }
@@ -171,5 +246,22 @@ body {
 	justify-content: center;
 	width: 40px;
 	background: #f7f7f7;
+}
+
+button {
+	margin: 0 auto;
+	width: 150px;
+	height: 50px;
+	font-size: 1.5em;
+	padding: 0.75rem;
+	border-radius: 1rem;
+	position: absolute;
+
+	bottom: 15px;
+	right: 115px;
+}
+
+button:focus {
+	outline: none;
 }
 </style>

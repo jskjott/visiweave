@@ -2,6 +2,14 @@
 	<div id="unweavedForms">
 		<div class="unweavedForm">
 			<svg
+				:height="height / 2"
+				:width="width"
+				transform="rotate(180) translate(0,-1)"
+			>
+				<path :d="`M0,0 a1,1 0 0,0 ${width},0`" fill="lavender" />
+			</svg>
+			<svg
+				class="weave"
 				:height="height"
 				:width="width"
 				xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +28,7 @@
 						:id="cell.id"
 						:d="cell.join(' ').replace(',', ' ')"
 						stroke="black"
-						stroke-width="4"
+						stroke-width="2"
 						fill="none"
 						:transform="
 							`scale(${1.8 /
@@ -34,6 +42,14 @@
 
 		<div class="unweavedForm">
 			<svg
+				:height="height / 2"
+				:width="width"
+				transform="rotate(180) translate(0,-1)"
+			>
+				<path :d="`M0,0 a1,1 0 0,0 ${width},0`" fill="crimson" />
+			</svg>
+			<svg
+				class="weave"
 				:height="height"
 				:width="width"
 				xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +67,7 @@
 						:id="cell.id"
 						:d="cell.join(' ').replace(',', ' ')"
 						stroke="black"
-						stroke-width="4"
+						stroke-width="2"
 						fill="none"
 						:transform="
 							`scale(${1.8 /
@@ -207,21 +223,23 @@ export default vue
 <style scoped="">
 #unweavedForms {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
 	/*grid-template-columns: 133.5px;
 	grid-template-rows: 133.5px;*/
 }
 
 .unweavedForm {
 	padding: 0.5rem;
+	padding-left: 1.5rem;
 }
 
 span {
 	display: inline-block;
 }
 
-svg {
-	border: 1px solid grey;
+.weave {
+	/*border-right: 1px solid grey;
+	border-bottom: 1px solid grey;
+	border-top: 1px solid grey;*/
 	box-sizing: border-box;
 }
 </style>
