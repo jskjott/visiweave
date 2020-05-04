@@ -5,7 +5,7 @@
 		</div>
 		<div id="container">
 			<div id="interpreterContainer">
-				<div id="interpreter" v-if="showInterpreter">
+				<div id="interpreter" v-show="showInterpreter">
 					<interpreter
 						@evaluated="evaluated"
 						v-bind="{ height, width, urlHash }"
@@ -25,8 +25,8 @@
 			</div>
 			<div id="exportPaneContainer">
 				<div class="toggler" v-on:click="toggle('showExportPane')">
-					<span v-if="showExportPane"> > </span>
-					<span v-else> < </span>
+					<span v-show="showExportPane"> > </span>
+					<span v-if="!showExportPane"> < </span>
 				</div>
 				<div v-if="showExportPane" id="exportPane">
 					<!-- <colourSelector @colours="updateColour"></colourSelector> -->
@@ -115,11 +115,11 @@ const vue = Vue.extend({
 			let gridTemplateColumns
 
 			if (this.showInterpreter && this.showExportPane) {
-				gridTemplateColumns = '2fr 3fr 2fr'
+				gridTemplateColumns = '400px 3fr 400px'
 			} else if (this.showInterpreter) {
-				gridTemplateColumns = '10fr 25fr 1fr'
+				gridTemplateColumns = '400px 25fr 1fr'
 			} else if (this.showExportPane) {
-				gridTemplateColumns = '1fr 25fr 10fr'
+				gridTemplateColumns = '1fr 25fr 400px'
 			} else {
 				gridTemplateColumns = '1fr 30fr 1fr'
 			}
@@ -180,7 +180,38 @@ body {
 }
 
 #exportPane {
-	width: 360px;
+	width: 400px;
+}
+
+#exportPaneContainer {
+	display: flex;
+}
+
+.toggler {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	background: #f7f7f7;
+	font-size: 2em;
+	max-width: 50px;
+}
+
+button {
+	margin: 0 auto;
+	width: 150px;
+	height: 50px;
+	font-size: 1.5em;
+	padding: 0.75rem;
+	border-radius: 1rem;
+	position: absolute;
+
+	bottom: 15px;
+	right: 115px;
+}
+
+button:focus {
+	outline: none;
 }
 
 @media print {
@@ -234,34 +265,5 @@ body {
 	#formulaBar {
 		display: none;
 	}
-}
-
-#exportPaneContainer {
-	display: flex;
-}
-
-.toggler {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	background: #f7f7f7;
-}
-
-button {
-	margin: 0 auto;
-	width: 150px;
-	height: 50px;
-	font-size: 1.5em;
-	padding: 0.75rem;
-	border-radius: 1rem;
-	position: absolute;
-
-	bottom: 15px;
-	right: 115px;
-}
-
-button:focus {
-	outline: none;
 }
 </style>
