@@ -109,6 +109,7 @@ interface Special {
 }
 type LambdaList = [Input, Input[], ...Array<LispList>]
 type DefList = [Input, Input, ...Array<LispList>]
+type DefnList = [Input, Input, Input[], ...Array<LispList>]
 
 const special: Special = {
 	lambda: function(input: LambdaList, context: Context, library: any) {
@@ -134,6 +135,29 @@ const special: Special = {
 		const [, value] = input
 		context.scope[identifier] = interpret(value, context, library)
 		return value
+	},
+	defn: function(input: DefList, context: Context, library: any) {
+		const identifier = input[1].value
+
+		const fnParams = input[2]
+		const fnBody = input[3]
+
+		context.scope[identifier] = function() {
+			const lambdaArguments = arguments
+			const lambdaScope = fnParams.reduce(
+				(acc: LambdaArguments, x: Input, i: number) => {
+					acc[x.value] = lambdaArguments[i + 1]
+					return acc
+				},
+				{},
+			)
+			const returned = interpret(
+				fnBody,
+				new Context(lambdaScope, context),
+				library,
+			)
+			return returned
+		}
 	},
 }
 
