@@ -1,14 +1,25 @@
 <template>
 	<div id="app">
 		<div id="formulaBar">
-			<formulaBar></formulaBar>
+			<formulaBar
+				@transformUpdate="transformUpdate"
+				v-bind="{ selectTransforms, selection }"
+			></formulaBar>
 		</div>
 		<div id="container">
 			<div id="interpreterContainer">
 				<div id="interpreter" v-show="showInterpreter">
 					<interpreter
 						@evaluated="evaluated"
-						v-bind="{ height, width, urlHash }"
+						@transformUpdate="transformUpdate"
+						v-bind="{
+							height,
+							width,
+							urlHash,
+							selectTransforms,
+							renderCount,
+							showInterpreter,
+						}"
 					></interpreter>
 				</div>
 				<div class="toggler" v-on:click="toggle('showInterpreter')">
@@ -93,6 +104,10 @@ const vue = Vue.extend({
 	methods: {
 		print: function() {
 			window.print()
+		},
+		transformUpdate: function(data: {}) {
+			this.renderCount++
+			this.selectTransforms = data.selectTransforms
 		},
 		evaluated: function(data: {}) {
 			const { cells, columns, compressed } = data

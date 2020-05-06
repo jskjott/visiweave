@@ -8,6 +8,10 @@ export interface Cell {
 		x: number
 		y: number
 	}
+	coordinate: {
+		x: number
+		y: number
+	}
 	width: number
 	height: number
 	transformations: {
@@ -23,6 +27,7 @@ export interface State {
 	showExportPane: boolean
 	height: number
 	width: number
+	renderCount: number
 	columns: number[]
 	cells: {}
 	heartmap: {
@@ -30,6 +35,7 @@ export interface State {
 	}
 	key: number
 	selection: string
+	selectTransforms: {}
 	urlHash: string
 	colours: {
 		colourA: string
@@ -42,10 +48,12 @@ export const state: State = {
 	showExportPane: false,
 	height: 1840,
 	width: 1840,
+	renderCount: 0,
 	columns: [],
 	cells: {},
 	key: 0,
 	selection: '',
+	selectTransforms: {},
 	urlHash: '',
 	colours: {
 		colourA: 'lavender',

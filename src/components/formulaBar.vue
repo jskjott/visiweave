@@ -1,6 +1,6 @@
 <template>
 	<div id="header">
-		<input id="commandLine" type=""
+		<input v-model="selectTransforms[selectionString]" v-on:input="updateFormula" id="commandLine" placeholder="fx" 
 name="" />
 	</div>
 </template>
@@ -10,11 +10,38 @@ import Vue from 'vue'
 
 const vue = Vue.extend({
 	name: 'CommandLine',
-	props: [],
+	props: ['selectTransforms', 'selection'],
 	data() {
 		return {}
 	},
-	methods: {},
+	methods: {
+		updateFormula: function(){
+			console.log('change', this.selectTransforms[this.selectionString])
+
+			const selectTransforms = this.selectTransforms
+
+			this.$emit('transformUpdate', {
+				selectTransforms
+			})
+		}
+	},
+	computed: {
+		selectionString: function(){
+			if (this.selection) {
+				const start = this.selection[0].id
+				const end = this.selection[1].id
+
+				return `${start}:${end}`
+			}
+		}
+	}
+	watch: { 
+		selection: function(){
+			if (!this.selectTransforms[this.selectionString]) {
+				this.selectTransforms[this.selectionString] = `(each(select "${this.selectionString}") (lambda (a) ()))`
+			}
+		},
+	}
 })
 
 export default vue

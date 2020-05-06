@@ -1,9 +1,8 @@
 <template>
 	<div style="height: 100%">
-		<textarea
-			id="interpreter"
-			style="height: 100%; width: 300px"
-		></textarea>
+		<textarea id="interpreter" style="height: 100%; width: 300px">
+()</textarea
+		>
 	</div>
 </template>
 
@@ -49,18 +48,81 @@ const columns: number[] = [
 	0.04,
 ]
 let interpreter: CodeMirror
+let text
 
 const vue = Vue.extend({
 	name: 'Interpreter',
 	methods: library,
-	props: ['width', 'height', 'selection', 'urlHash'],
+	props: [
+		'width',
+		'height',
+		'selection',
+		'urlHash',
+		'selectTransforms',
+		'renderCount',
+		'showInterpreter',
+	],
 	data() {
 		return {
+			text,
 			columns,
 			interpreter,
 		}
 	},
 	watch: {
+		showInterpreter: function() {
+			this.interpreter.setCursor(this.interpreter.lineCount(), 0)
+		},
+		renderCount: function() {
+			const stateData = {
+				text: this.text,
+				selectTransforms: this.selectTransforms,
+			}
+
+			const compressed = `#0${compress(JSON.stringify(stateData))}`
+
+			const cellTransformations = Object.values(
+				this.selectTransforms,
+			).reduce((acc, cur) => {
+				return acc + cur
+			}, '')
+
+			Object.values(this.cells).forEach((cell, index) => {
+				if (index === 0) {
+					console.log(cell.points.length)
+				}
+				console.log()
+				cell.transformations = {
+					a: [],
+					b: [],
+					c: [],
+					d: [],
+				}
+				cell.points = [
+					[`M${cell.origin.x}`, cell.origin.y],
+					[
+						`L${cell.origin.x}`,
+						cell.origin.y + this.height * cell.coordinate.y,
+					],
+					[
+						`L${cell.origin.x + this.width * cell.coordinate.x}`,
+						cell.origin.y + this.height * cell.coordinate.y,
+					],
+					[
+						`L${cell.origin.x + this.width * cell.coordinate.x}`,
+						cell.origin.y,
+					],
+				]
+			})
+
+			interpretLispString(text + ' ' + cellTransformations, this)
+
+			this.$emit('evaluated', {
+				compressed,
+				columns: this.columns,
+				cells: this.cells,
+			})
+		},
 		selection: function(selection) {
 			const selectionString = `
 
@@ -75,7 +137,15 @@ const vue = Vue.extend({
 		},
 		urlHash: function(url) {
 			const decompressed = decompress(url.substr(2))
-			this.interpreter.setValue(decompressed)
+
+			const { text, selectTransforms } = JSON.parse(decompressed)
+
+			this.interpreter.setValue(text)
+
+			this.$emit('transformUpdate', {
+				selectTransforms,
+			})
+
 			Vue.nextTick(() => {
 				this.interpreter.refresh()
 			})
@@ -91,9 +161,50 @@ const vue = Vue.extend({
 
 		this.interpreter.on('change', (cm: CodeMirror) => {
 			const text = cm.getValue()
+			this.text = text
 
-			const compressed = `#0${compress(text)}`
-			interpretLispString(text, this)
+			const stateData = {
+				text,
+				selectTransforms: this.selectTransforms,
+			}
+
+			const compressed = `#0${compress(JSON.stringify(stateData))}`
+
+			const cellTransformations = Object.values(
+				this.selectTransforms,
+			).reduce((acc, cur) => {
+				return acc + cur
+			}, '')
+
+			Object.values(this.cells).forEach((cell, index) => {
+				if (index === 0) {
+					console.log(cell.points.length)
+				}
+				console.log()
+				cell.transformations = {
+					a: [],
+					b: [],
+					c: [],
+					d: [],
+				}
+				cell.points = [
+					[`M${cell.origin.x}`, cell.origin.y],
+					[
+						`L${cell.origin.x}`,
+						cell.origin.y + this.height * cell.coordinate.y,
+					],
+					[
+						`L${cell.origin.x + this.width * cell.coordinate.x}`,
+						cell.origin.y + this.height * cell.coordinate.y,
+					],
+					[
+						`L${cell.origin.x + this.width * cell.coordinate.x}`,
+						cell.origin.y,
+					],
+				]
+			})
+
+			interpretLispString(text + ' ' + cellTransformations, this)
 
 			this.$emit('evaluated', {
 				compressed,
@@ -108,38 +219,20 @@ const vue = Vue.extend({
 
 		const keysPressed: KeysPressed = {}
 
-		window.onkeydown = (event: KeyboardEvent): any => {
-			if (event) {
-				keysPressed[event.key] = true
-			}
-
-			if (keysPressed.Meta && keysPressed.Enter) {
-				const [svg] = document.getElementsByTagName('svg')
-				if (svg && svg.parentNode) {
-					svg.parentNode.replaceChild(svg.cloneNode(false), svg)
-				}
-
-				const [interpreter] = document.getElementsByTagName('textarea')
-
-				if (interpreter) {
-					interpretLispString(interpreter.value, this)
-
-					this.$emit('evaluated', {
-						columns: this.columns,
-						cells: this.cells,
-					})
-				}
-			}
-		}
-
 		window.onkeyup = (event: KeyboardEvent): any => {
 			delete keysPressed[event.key]
 		}
 
 		this.interpreter.refresh()
+
+		if (!window.location.hash) {
+			window.location.hash = '#0{"text":"()","selectTransformsĆ{}}'
+		}
 	},
 	computed: {
 		cells: function() {
+			this.recompute
+
 			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 			const { columns } = this
 
@@ -170,6 +263,10 @@ const vue = Vue.extend({
 						origin: {
 							x: xOri,
 							y: yOri,
+						},
+						coordinate: {
+							x: xAxis,
+							y: yAxis,
 						},
 						width: xAxis * this.width,
 						height: yAxis * this.height,
