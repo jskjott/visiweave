@@ -109,6 +109,13 @@ const vue = Vue.extend({
 				cell.setAttribute('class', '')
 			}
 
+			const cellDOMElement = this.$el.querySelector(`#${cellId}`)
+			this.cells[cellId].selected = true
+
+			if (cellDOMElement) {
+				cellDOMElement.setAttribute('class', 'selected')
+			}
+
 			this.selection = ''
 
 			this.mouseDown = true
