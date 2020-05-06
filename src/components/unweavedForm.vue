@@ -113,6 +113,18 @@ const vue = Vue.extend({
 			this.selectionOrigin = begin.origin
 		},
 	},
+	mounted: function() {
+		if (this.selection.length > 0) {
+			const [begin, end] = this.selection
+			const init = parseInt(begin.id.slice(1))
+			const limit = parseInt(end.id.slice(1))
+			const upper = this.columns.reduce((acc, cur, idx) => {
+				return idx <= limit && idx >= init ? acc + cur : acc
+			}, 0)
+			this.selectionEnd = upper
+			this.selectionOrigin = begin.origin
+		}
+	},
 	computed: {
 		unweavedColumns: function() {
 			const data = {
