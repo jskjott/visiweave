@@ -124,7 +124,7 @@ const library: Library = {
 
 	// Drawing
 
-	sidepath: (vue, cellId, side, pathData) => {
+	anchor: (vue, cellId, side, pathData) => {
 		let cell
 
 		if (Array.isArray(cellId)) {
